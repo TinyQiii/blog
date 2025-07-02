@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Message 表格</title>
+    <style>
+        body {
+            font-family: "Segoe UI", sans-serif;
+            margin: 40px;
+            background-color: #f9f9f9;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        input, button {
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 80%;
+            margin-top: 20px;
+            background-color: #fff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        th, td {
+            padding: 12px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            text-align: left;
+        }
+
+        th {
+            background-color: #007BFF;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #f1f7ff;
+        }
+
+        td {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+<h1>消息列表</h1>
+
+<!-- 输入框和按钮 -->
+<input type="text" id="messageInput" placeholder="输入消息内容">
+<button onclick="addMessage()">添加</button>
+
+<!-- 表格展示 -->
+<table id="messageTable">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>内容</th>
+    </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+</table>
+
+<script>
+    // 获取消息并填充表格
+    function loadMessages() {
+        fetch('/messages')
+            .then(response => response.json())
+            .then(data => {
+                const tbody = document.getElementById('tableBody');
+                tbody.innerHTML = ''; // 清空旧数据
+                data.forEach(msg => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${msg.id}</td><td>${msg.content}</td>`;
+                    tbody.appendChild(row);
+                });
+            });
+    }
+
+    // 添加消息
+    function addMessage() {
+        const content = document.getElementById('messageInput').value.trim();
+        if (!content) return alert('内容不能为空');
+
+        fetch('/messages', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ content })
+        }).then(() => {
+            document.getElementById('messageInput').value = ''; // 清空输入框
+            loadMessages(); // 重新加载表格
+        }).catch(err => {
+            console.error('添加失败:', err);
+        });
+    }
+
+    // 页面加载时拉取数据
+    window.onload = loadMessages;
+</script>
+</body>
+</html>
